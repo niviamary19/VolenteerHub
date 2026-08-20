@@ -1,0 +1,277 @@
+﻿<Window x:Class="VolenteerHub.Views.ManageEventWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="VolunteerHub - Manage Events"
+        Height="700"
+        Width="1100"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        Background="#F4F7FB">
+
+    <Grid>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="220"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- SIDEBAR -->
+        <Border Background="#1F4F46">
+
+            <Grid Margin="20">
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <StackPanel>
+
+                    <TextBlock Text="VolunteerHub"
+                               FontSize="26"
+                               FontWeight="Bold"
+                               Foreground="White"
+                               Margin="0,10,0,40"/>
+
+                    <Button Content="Dashboard"
+                            Height="45"
+                            Margin="0,0,0,10"
+                            Background="Transparent"
+                            Foreground="White"
+                            BorderThickness="0"
+                            FontWeight="SemiBold"
+                            HorizontalContentAlignment="Left"
+                            Padding="15,0"
+                            Cursor="Hand"
+                            Click="DashboardButton_Click"/>
+
+                    <Button Content="Manage Events"
+                            Height="45"
+                            Margin="0,0,0,10"
+                            Background="#2E7D6E"
+                            Foreground="White"
+                            BorderThickness="0"
+                            FontWeight="SemiBold"
+                            HorizontalContentAlignment="Left"
+                            Padding="15,0"/>
+
+                    <Button Content="Create Event"
+                            Height="45"
+                            Margin="0,0,0,10"
+                            Background="Transparent"
+                            Foreground="White"
+                            BorderThickness="0"
+                            FontWeight="SemiBold"
+                            HorizontalContentAlignment="Left"
+                            Padding="15,0"
+                            Cursor="Hand"
+                            Click="CreateEventButton_Click"/>
+
+                </StackPanel>
+
+                <Button Grid.Row="2"
+                        Content="Back to dashboard"
+                        Height="45"
+                        Background="#173B35"
+                        Foreground="White"
+                        BorderThickness="0"
+                        FontWeight="SemiBold"
+                        Cursor="Hand"
+                        Click="DashboardButton_Click"/>
+
+            </Grid>
+
+        </Border>
+
+        <!-- MAIN -->
+        <Grid Grid.Column="1"
+              Margin="35">
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- HEADER -->
+            <StackPanel>
+
+                <TextBlock Text="Manage Events"
+                           FontSize="30"
+                           FontWeight="Bold"
+                           Foreground="#1F2937"/>
+
+                <TextBlock Text="Edit your events and manage registered volunteers."
+                           Margin="0,5,0,0"
+                           FontSize="15"
+                           Foreground="#6B7280"/>
+
+            </StackPanel>
+
+            <!-- EVENT SELECTION -->
+            <Border Grid.Row="1"
+                    Background="White"
+                    CornerRadius="12"
+                    Padding="20"
+                    Margin="0,25,0,20">
+
+                <Grid>
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="110"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="140"/>
+                        <ColumnDefinition Width="140"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Text="Select event"
+                               VerticalAlignment="Center"
+                               FontWeight="Bold"
+                               Foreground="#374151"/>
+
+                    <ComboBox x:Name="EventComboBox"
+                              Grid.Column="1"
+                              Height="40"
+                              Margin="10,0,15,0"
+                              DisplayMemberPath="Title"
+                              SelectionChanged="EventComboBox_SelectionChanged"/>
+
+                    <Button Grid.Column="2"
+                            Content="Edit event"
+                            Height="40"
+                            Margin="0,0,10,0"
+                            Background="#DDEFEA"
+                            Foreground="#1F4F46"
+                            BorderThickness="0"
+                            FontWeight="Bold"
+                            Cursor="Hand"
+                            Click="EditEventButton_Click"/>
+
+                    <Button Grid.Column="3"
+                            Content="Delete event"
+                            Height="40"
+                            Background="#FEE2E2"
+                            Foreground="#991B1B"
+                            BorderThickness="0"
+                            FontWeight="Bold"
+                            Cursor="Hand"
+                            Click="DeleteEventButton_Click"/>
+
+                </Grid>
+
+            </Border>
+
+            <!-- PARTICIPANTS -->
+            <Border Grid.Row="2"
+                    Background="White"
+                    CornerRadius="15"
+                    Padding="22">
+
+                <Grid>
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock x:Name="ParticipantsTitleText"
+                               Text="Registered volunteers"
+                               FontSize="20"
+                               FontWeight="Bold"
+                               Foreground="#1F2937"
+                               Margin="0,0,0,18"/>
+
+                    <DataGrid x:Name="ParticipantsDataGrid"
+                              Grid.Row="1"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              CanUserAddRows="False"
+                              SelectionMode="Single"
+                              HeadersVisibility="Column"
+                              GridLinesVisibility="Horizontal"
+                              RowHeight="42"
+                              SelectionChanged="ParticipantsDataGrid_SelectionChanged">
+
+                        <DataGrid.Columns>
+
+                            <DataGridTextColumn Header="Volunteer"
+                                                Binding="{Binding FullName}"
+                                                Width="*"/>
+
+                            <DataGridTextColumn Header="Email"
+                                                Binding="{Binding Email}"
+                                                Width="220"/>
+
+                            <DataGridTextColumn Header="Status"
+                                                Binding="{Binding Status}"
+                                                Width="110"/>
+
+                            <DataGridTextColumn Header="Hours"
+                                                Binding="{Binding HoursDisplay}"
+                                                Width="90"/>
+
+                        </DataGrid.Columns>
+
+                    </DataGrid>
+
+                </Grid>
+
+            </Border>
+
+            <!-- HOURS -->
+            <Border Grid.Row="3"
+                    Background="White"
+                    CornerRadius="12"
+                    Padding="18"
+                    Margin="0,20,0,0">
+
+                <Grid>
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="140"/>
+                        <ColumnDefinition Width="160"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel>
+
+                        <TextBlock x:Name="SelectedVolunteerText"
+                                   Text="Select a volunteer to register hours."
+                                   FontWeight="Bold"
+                                   Foreground="#374151"/>
+
+                        <TextBlock Text="Enter the number of completed volunteer hours."
+                                   Margin="0,4,0,0"
+                                   FontSize="12"
+                                   Foreground="#6B7280"/>
+
+                    </StackPanel>
+
+                    <TextBox x:Name="HoursTextBox"
+                             Grid.Column="1"
+                             Height="40"
+                             Margin="15,0,15,0"
+                             Padding="10"
+                             VerticalContentAlignment="Center"/>
+
+                    <Button Grid.Column="2"
+                            Content="Save hours"
+                            Height="40"
+                            Background="#2E7D6E"
+                            Foreground="White"
+                            FontWeight="Bold"
+                            BorderThickness="0"
+                            Cursor="Hand"
+                            Click="SaveHoursButton_Click"/>
+
+                </Grid>
+
+            </Border>
+
+        </Grid>
+
+    </Grid>
+
+</Window>

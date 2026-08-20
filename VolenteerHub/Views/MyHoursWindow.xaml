@@ -1,0 +1,262 @@
+﻿<Window x:Class="VolenteerHub.Views.MyHoursWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="VolunteerHub - My Hours"
+        Height="700"
+        Width="1100"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        Background="#F4F7FB">
+
+    <Grid>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="220"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- SIDEBAR -->
+        <Border Background="#1F4F46">
+
+            <Grid Margin="20">
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <StackPanel>
+
+                    <TextBlock Text="VolunteerHub"
+                               FontSize="26"
+                               FontWeight="Bold"
+                               Foreground="White"
+                               Margin="0,10,0,40"/>
+
+                    <Button Content="Dashboard"
+                            Height="45"
+                            Margin="0,0,0,10"
+                            Background="Transparent"
+                            Foreground="White"
+                            BorderThickness="0"
+                            FontWeight="SemiBold"
+                            HorizontalContentAlignment="Left"
+                            Padding="15,0"
+                            Cursor="Hand"
+                            Click="DashboardButton_Click"/>
+
+                    <Button Content="Events"
+                            Height="45"
+                            Margin="0,0,0,10"
+                            Background="Transparent"
+                            Foreground="White"
+                            BorderThickness="0"
+                            FontWeight="SemiBold"
+                            HorizontalContentAlignment="Left"
+                            Padding="15,0"
+                            Cursor="Hand"
+                            Click="EventsButton_Click"/>
+
+                    <Button Content="My Hours"
+                            Height="45"
+                            Margin="0,0,0,10"
+                            Background="#2E7D6E"
+                            Foreground="White"
+                            BorderThickness="0"
+                            FontWeight="SemiBold"
+                            HorizontalContentAlignment="Left"
+                            Padding="15,0"/>
+
+                </StackPanel>
+
+                <Button Grid.Row="2"
+                        Content="Back to dashboard"
+                        Height="45"
+                        Background="#173B35"
+                        Foreground="White"
+                        BorderThickness="0"
+                        FontWeight="SemiBold"
+                        Cursor="Hand"
+                        Click="DashboardButton_Click"/>
+
+            </Grid>
+
+        </Border>
+
+        <!-- MAIN CONTENT -->
+        <Grid Grid.Column="1"
+              Margin="35">
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- TITLE -->
+            <StackPanel>
+
+                <TextBlock Text="My Volunteering"
+                           FontSize="30"
+                           FontWeight="Bold"
+                           Foreground="#1F2937"/>
+
+                <TextBlock Text="Track your registered events and volunteer hours."
+                           Margin="0,5,0,0"
+                           FontSize="15"
+                           Foreground="#6B7280"/>
+
+            </StackPanel>
+
+            <!-- SUMMARY -->
+            <Grid Grid.Row="1"
+                  Margin="0,25,0,25">
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Border Background="White"
+                        CornerRadius="14"
+                        Padding="22">
+
+                    <StackPanel>
+
+                        <TextBlock Text="Total hours"
+                                   Foreground="#6B7280"
+                                   FontSize="14"/>
+
+                        <TextBlock x:Name="TotalHoursText"
+                                   Text="0 h"
+                                   FontSize="30"
+                                   FontWeight="Bold"
+                                   Foreground="#1F2937"
+                                   Margin="0,8,0,0"/>
+
+                    </StackPanel>
+
+                </Border>
+
+                <Border Grid.Column="2"
+                        Background="White"
+                        CornerRadius="14"
+                        Padding="22">
+
+                    <StackPanel>
+
+                        <TextBlock Text="Joined events"
+                                   Foreground="#6B7280"
+                                   FontSize="14"/>
+
+                        <TextBlock x:Name="JoinedEventsText"
+                                   Text="0"
+                                   FontSize="30"
+                                   FontWeight="Bold"
+                                   Foreground="#1F2937"
+                                   Margin="0,8,0,0"/>
+
+                    </StackPanel>
+
+                </Border>
+
+                <Border Grid.Column="4"
+                        Background="White"
+                        CornerRadius="14"
+                        Padding="22">
+
+                    <StackPanel>
+
+                        <TextBlock Text="Upcoming"
+                                   Foreground="#6B7280"
+                                   FontSize="14"/>
+
+                        <TextBlock x:Name="UpcomingEventsText"
+                                   Text="0"
+                                   FontSize="30"
+                                   FontWeight="Bold"
+                                   Foreground="#1F2937"
+                                   Margin="0,8,0,0"/>
+
+                    </StackPanel>
+
+                </Border>
+
+            </Grid>
+
+            <!-- TABLE -->
+            <Border Grid.Row="2"
+                    Background="White"
+                    CornerRadius="15"
+                    Padding="22">
+
+                <Grid>
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock x:Name="EventsTitleText"
+                               Text="My events"
+                               FontSize="20"
+                               FontWeight="Bold"
+                               Foreground="#1F2937"
+                               Margin="0,0,0,18"/>
+
+                    <DataGrid x:Name="MyEventsDataGrid"
+                              Grid.Row="1"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              CanUserAddRows="False"
+                              HeadersVisibility="Column"
+                              GridLinesVisibility="Horizontal"
+                              RowHeight="42">
+
+                        <DataGrid.Columns>
+
+                            <DataGridTextColumn Header="Event"
+                                                Binding="{Binding Title}"
+                                                Width="*"/>
+
+                            <DataGridTextColumn Header="Date"
+                                                Binding="{Binding EventDate}"
+                                                Width="100"/>
+
+                            <DataGridTextColumn Header="Start"
+                                                Binding="{Binding StartTime}"
+                                                Width="75"/>
+
+                            <DataGridTextColumn Header="Location"
+                                                Binding="{Binding Location}"
+                                                Width="150"/>
+
+                            <DataGridTextColumn Header="Category"
+                                                Binding="{Binding Category}"
+                                                Width="110"/>
+
+                            <DataGridTextColumn Header="Event status"
+                                                Binding="{Binding EventStatus}"
+                                                Width="100"/>
+
+                            <DataGridTextColumn Header="Hours"
+                                                Binding="{Binding HoursDisplay}"
+                                                Width="80"/>
+
+                        </DataGrid.Columns>
+
+                    </DataGrid>
+
+                </Grid>
+
+            </Border>
+
+        </Grid>
+
+    </Grid>
+
+</Window>
