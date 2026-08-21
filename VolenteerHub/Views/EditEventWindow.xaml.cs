@@ -13,6 +13,7 @@ namespace VolenteerHub.Views
 
         private VolunteerEvent currentEvent;
 
+
         public EditEventWindow(
             User user,
             VolunteerEvent volunteerEvent)
@@ -20,51 +21,58 @@ namespace VolenteerHub.Views
             InitializeComponent();
 
             currentUser = user;
+
             currentEvent = volunteerEvent;
 
             LoadEventInformation();
         }
+
+
+        // =====================================================
+        // LOAD EVENT
+        // =====================================================
 
         private void LoadEventInformation()
         {
             TitleTextBox.Text =
                 currentEvent.Title;
 
+
             DescriptionTextBox.Text =
                 currentEvent.Description;
+
 
             StartTimeTextBox.Text =
                 currentEvent.StartTime;
 
+
             EndTimeTextBox.Text =
                 currentEvent.EndTime;
+
 
             LocationTextBox.Text =
                 currentEvent.Location;
 
-            LatitudeTextBox.Text =
-                currentEvent.Latitude.ToString(
-                    CultureInfo.InvariantCulture);
-
-            LongitudeTextBox.Text =
-                currentEvent.Longitude.ToString(
-                    CultureInfo.InvariantCulture);
 
             MaxVolunteersTextBox.Text =
-                currentEvent.MaxVolunteers.ToString();
+                currentEvent.MaxVolunteers
+                    .ToString();
+
 
             DateTime eventDate;
 
+
             if (DateTime.TryParseExact(
-                currentEvent.EventDate,
-                "yyyy-MM-dd",
-                CultureInfo.InvariantCulture,
-                DateTimeStyles.None,
-                out eventDate))
+                    currentEvent.EventDate,
+                    "yyyy-MM-dd",
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.None,
+                    out eventDate))
             {
                 EventDatePicker.SelectedDate =
                     eventDate;
             }
+
 
             for (int i = 0;
                  i < CategoryComboBox.Items.Count;
@@ -73,6 +81,7 @@ namespace VolenteerHub.Views
                 ComboBoxItem item =
                     CategoryComboBox.Items[i]
                     as ComboBoxItem;
+
 
                 if (item != null &&
                     item.Content.ToString() ==
@@ -85,11 +94,18 @@ namespace VolenteerHub.Views
                 }
             }
 
+
             if (CategoryComboBox.SelectedIndex < 0)
             {
-                CategoryComboBox.SelectedIndex = 0;
+                CategoryComboBox.SelectedIndex =
+                    0;
             }
         }
+
+
+        // =====================================================
+        // SAVE EVENT
+        // =====================================================
 
         private void SaveButton_Click(
             object sender,
@@ -98,38 +114,61 @@ namespace VolenteerHub.Views
             string title =
                 TitleTextBox.Text.Trim();
 
+
             string description =
                 DescriptionTextBox.Text.Trim();
+
 
             string startTime =
                 StartTimeTextBox.Text.Trim();
 
+
             string endTime =
                 EndTimeTextBox.Text.Trim();
 
+
             string location =
                 LocationTextBox.Text.Trim();
+
 
             ComboBoxItem selectedCategory =
                 CategoryComboBox.SelectedItem
                 as ComboBoxItem;
 
+
             string category =
                 selectedCategory == null
                     ? ""
-                    : selectedCategory.Content.ToString();
+                    : selectedCategory
+                        .Content
+                        .ToString();
 
-            if (string.IsNullOrWhiteSpace(title) ||
-                string.IsNullOrWhiteSpace(description) ||
-                EventDatePicker.SelectedDate == null ||
-                string.IsNullOrWhiteSpace(startTime) ||
-                string.IsNullOrWhiteSpace(endTime) ||
-                string.IsNullOrWhiteSpace(category) ||
-                string.IsNullOrWhiteSpace(location) ||
+
+            // =================================================
+            // REQUIRED FIELDS
+            // =================================================
+
+            if (string.IsNullOrWhiteSpace(
+                    title) ||
+
                 string.IsNullOrWhiteSpace(
-                    LatitudeTextBox.Text) ||
+                    description) ||
+
+                EventDatePicker.SelectedDate ==
+                    null ||
+
                 string.IsNullOrWhiteSpace(
-                    LongitudeTextBox.Text) ||
+                    startTime) ||
+
+                string.IsNullOrWhiteSpace(
+                    endTime) ||
+
+                string.IsNullOrWhiteSpace(
+                    category) ||
+
+                string.IsNullOrWhiteSpace(
+                    location) ||
+
                 string.IsNullOrWhiteSpace(
                     MaxVolunteersTextBox.Text))
             {
@@ -142,8 +181,15 @@ namespace VolenteerHub.Views
                 return;
             }
 
+
+            // =================================================
+            // TIME VALIDATION
+            // =================================================
+
             DateTime startTimeValue;
+
             DateTime endTimeValue;
+
 
             bool validStartTime =
                 DateTime.TryParseExact(
@@ -153,6 +199,7 @@ namespace VolenteerHub.Views
                     DateTimeStyles.None,
                     out startTimeValue);
 
+
             bool validEndTime =
                 DateTime.TryParseExact(
                     endTime,
@@ -160,6 +207,7 @@ namespace VolenteerHub.Views
                     CultureInfo.InvariantCulture,
                     DateTimeStyles.None,
                     out endTimeValue);
+
 
             if (!validStartTime ||
                 !validEndTime)
@@ -173,6 +221,7 @@ namespace VolenteerHub.Views
                 return;
             }
 
+
             if (endTimeValue <=
                 startTimeValue)
             {
@@ -185,50 +234,13 @@ namespace VolenteerHub.Views
                 return;
             }
 
-            double latitude;
-            double longitude;
 
-            bool validLatitude =
-                double.TryParse(
-                    LatitudeTextBox.Text.Trim(),
-                    NumberStyles.Any,
-                    CultureInfo.InvariantCulture,
-                    out latitude);
-
-            bool validLongitude =
-                double.TryParse(
-                    LongitudeTextBox.Text.Trim(),
-                    NumberStyles.Any,
-                    CultureInfo.InvariantCulture,
-                    out longitude);
-
-            if (!validLatitude ||
-                !validLongitude)
-            {
-                MessageBox.Show(
-                    "Latitude and longitude must be valid numbers.\nUse a dot for decimals.",
-                    "VolunteerHub",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Warning);
-
-                return;
-            }
-
-            if (latitude < -90 ||
-                latitude > 90 ||
-                longitude < -180 ||
-                longitude > 180)
-            {
-                MessageBox.Show(
-                    "The coordinates are outside the valid range.",
-                    "VolunteerHub",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Warning);
-
-                return;
-            }
+            // =================================================
+            // MAX VOLUNTEERS
+            // =================================================
 
             int maxVolunteers;
+
 
             if (!int.TryParse(
                     MaxVolunteersTextBox.Text.Trim(),
@@ -244,9 +256,12 @@ namespace VolenteerHub.Views
                 return;
             }
 
+
             int currentRegistrations =
-                DatabaseHelper.GetRegistrationCount(
-                    currentEvent.Id);
+                DatabaseHelper
+                    .GetRegistrationCount(
+                        currentEvent.Id);
+
 
             if (maxVolunteers <
                 currentRegistrations)
@@ -261,44 +276,70 @@ namespace VolenteerHub.Views
                 return;
             }
 
+
+            // =================================================
+            // UPDATE EVENT
+            // =================================================
+
             DateTime eventDate =
-                EventDatePicker.SelectedDate.Value;
+                EventDatePicker
+                    .SelectedDate
+                    .Value;
+
 
             currentEvent.Title =
                 title;
 
+
             currentEvent.Description =
                 description;
+
 
             currentEvent.EventDate =
                 eventDate.ToString(
                     "yyyy-MM-dd");
 
+
             currentEvent.StartTime =
                 startTime;
+
 
             currentEvent.EndTime =
                 endTime;
 
+
             currentEvent.Category =
                 category;
+
 
             currentEvent.Location =
                 location;
 
-            currentEvent.Latitude =
-                latitude;
 
-            currentEvent.Longitude =
-                longitude;
+            /*
+             * IMPORTANT:
+             *
+             * We no longer ask the organizer to enter
+             * Latitude and Longitude manually.
+             *
+             * currentEvent.Latitude and
+             * currentEvent.Longitude are therefore
+             * left unchanged.
+             *
+             * Google Maps will use Location instead.
+             */
+
 
             currentEvent.MaxVolunteers =
                 maxVolunteers;
 
+
             bool updated =
-                EventManagementHelper.UpdateEvent(
-                    currentEvent,
-                    currentUser.Id);
+                EventManagementHelper
+                    .UpdateEvent(
+                        currentEvent,
+                        currentUser.Id);
+
 
             if (!updated)
             {
@@ -311,20 +352,29 @@ namespace VolenteerHub.Views
                 return;
             }
 
+
             MessageBox.Show(
                 "Event updated successfully!",
                 "VolunteerHub",
                 MessageBoxButton.OK,
                 MessageBoxImage.Information);
 
+
             ManageEventWindow manageWindow =
                 new ManageEventWindow(
                     currentUser);
 
+
             manageWindow.Show();
+
 
             this.Close();
         }
+
+
+        // =====================================================
+        // CANCEL
+        // =====================================================
 
         private void CancelButton_Click(
             object sender,
@@ -334,7 +384,9 @@ namespace VolenteerHub.Views
                 new ManageEventWindow(
                     currentUser);
 
+
             manageWindow.Show();
+
 
             this.Close();
         }

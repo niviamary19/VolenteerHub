@@ -4,6 +4,8 @@ using System.Globalization;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Media;
 using VolenteerHub.Data;
 using VolenteerHub.Models;
 
@@ -15,6 +17,9 @@ namespace VolenteerHub.Views
 
         private List<VolunteerEvent> allEvents;
 
+        private HashSet<int> registeredEventIds;
+
+
         public CalendarWindow(
             User user)
         {
@@ -24,6 +29,8 @@ namespace VolenteerHub.Views
 
             allEvents =
                 DatabaseHelper.GetAllEvents();
+
+            LoadRegisteredEventIds();
 
             EventCalendar.DisplayDate =
                 DateTime.Today;
@@ -35,9 +42,51 @@ namespace VolenteerHub.Views
                 DateTime.Today);
         }
 
+
+        // =====================================================
+        // LOAD USER REGISTRATIONS
+        // =====================================================
+
+        private void LoadRegisteredEventIds()
+        {
+            registeredEventIds =
+                new HashSet<int>();
+
+            if (currentUser == null)
+            {
+                return;
+            }
+
+            try
+            {
+                List<MyVolunteerEvent> userEvents =
+                    DatabaseHelper.GetUserVolunteerEvents(
+                        currentUser.Id);
+
+                foreach (MyVolunteerEvent volunteerEvent
+                    in userEvents)
+                {
+                    registeredEventIds.Add(
+                        volunteerEvent.EventId);
+                }
+            }
+            catch
+            {
+                registeredEventIds =
+                    new HashSet<int>();
+            }
+        }
+
+
+        // =====================================================
+        // SHOW MONTH
+        // =====================================================
+
         private void ShowEventsForMonth(
             DateTime month)
         {
+            RefreshCalendarData();
+
             List<VolunteerEvent> monthEvents =
                 allEvents
                 .Where(volunteerEvent =>
@@ -74,9 +123,16 @@ namespace VolenteerHub.Views
                 ")";
         }
 
+
+        // =====================================================
+        // SHOW ONE DATE
+        // =====================================================
+
         private void ShowEventsForDate(
             DateTime selectedDate)
         {
+            RefreshCalendarData();
+
             string dateText =
                 selectedDate.ToString(
                     "yyyy-MM-dd");
@@ -101,11 +157,312 @@ namespace VolenteerHub.Views
                 ")";
         }
 
+
+        // =====================================================
+        // REFRESH EVENTS + USER REGISTRATIONS
+        // =====================================================
+
+        private void RefreshCalendarData()
+        {
+            allEvents =
+                DatabaseHelper.GetAllEvents();
+
+            LoadRegisteredEventIds();
+
+            RefreshCalendarDayButtons();
+        }
+
+
+        // =====================================================
+        // CALENDAR DAY COLORS
+        // =====================================================
+
+        private void CalendarDayButton_Loaded(
+            object sender,
+            RoutedEventArgs e)
+        {
+            CalendarDayButton button =
+                sender as CalendarDayButton;
+
+            ApplyCalendarDayStyle(
+                button);
+        }
+
+
+        private void CalendarDayButton_DataContextChanged(
+            object sender,
+            DependencyPropertyChangedEventArgs e)
+        {
+            CalendarDayButton button =
+                sender as CalendarDayButton;
+
+            ApplyCalendarDayStyle(
+                button);
+        }
+
+
+        private void ApplyCalendarDayStyle(
+            CalendarDayButton button)
+        {
+            if (button == null)
+            {
+                return;
+            }
+
+            DateTime? buttonDate =
+                GetCalendarButtonDate(
+                    button);
+
+            if (buttonDate == null)
+            {
+                return;
+            }
+
+            string dateText =
+                buttonDate.Value.ToString(
+                    "yyyy-MM-dd");
+
+            List<VolunteerEvent> eventsOnDate =
+                allEvents
+                .Where(volunteerEvent =>
+                    volunteerEvent.EventDate ==
+                    dateText)
+                .ToList();
+
+
+            // ---------------------------------------------
+            // DEFAULT - NO EVENT
+            // ---------------------------------------------
+
+            button.Background =
+                Brushes.White;
+
+            button.Foreground =
+                new SolidColorBrush(
+                    Color.FromRgb(
+                        38,
+                        58,
+                        52));
+
+            button.BorderBrush =
+                Brushes.Transparent;
+
+            button.FontWeight =
+                FontWeights.Normal;
+
+            button.ToolTip =
+                null;
+
+
+            if (eventsOnDate.Count == 0)
+            {
+                return;
+            }
+
+
+            bool userJoinedEvent =
+                eventsOnDate
+                .Any(volunteerEvent =>
+                    registeredEventIds
+                    .Contains(
+                        volunteerEvent.Id));
+
+
+            // ---------------------------------------------
+            // GREEN - USER JOINED
+            // ---------------------------------------------
+
+            if (userJoinedEvent)
+            {
+                button.Background =
+                    new SolidColorBrush(
+                        Color.FromRgb(
+                            191,
+                            232,
+                            214));
+
+                button.Foreground =
+                    new SolidColorBrush(
+                        Color.FromRgb(
+                            5,
+                            98,
+                            78));
+
+                button.BorderBrush =
+                    new SolidColorBrush(
+                        Color.FromRgb(
+                            8,
+                            122,
+                            97));
+
+                button.FontWeight =
+                    FontWeights.Bold;
+
+                button.ToolTip =
+                    BuildCalendarTooltip(
+                        eventsOnDate,
+                        true);
+
+                return;
+            }
+
+
+            // ---------------------------------------------
+            // ORANGE - EVENT AVAILABLE
+            // ---------------------------------------------
+
+            button.Background =
+                new SolidColorBrush(
+                    Color.FromRgb(
+                        255,
+                        228,
+                        174));
+
+            button.Foreground =
+                new SolidColorBrush(
+                    Color.FromRgb(
+                        157,
+                        97,
+                        8));
+
+            button.BorderBrush =
+                new SolidColorBrush(
+                    Color.FromRgb(
+                        217,
+                        149,
+                        35));
+
+            button.FontWeight =
+                FontWeights.SemiBold;
+
+            button.ToolTip =
+                BuildCalendarTooltip(
+                    eventsOnDate,
+                    false);
+        }
+
+
+        private DateTime? GetCalendarButtonDate(
+            CalendarDayButton button)
+        {
+            if (button.DataContext
+                is DateTime)
+            {
+                return
+                    (DateTime)
+                    button.DataContext;
+            }
+
+            return null;
+        }
+
+
+        private string BuildCalendarTooltip(
+            List<VolunteerEvent> events,
+            bool hasJoinedEvent)
+        {
+            string title =
+                hasJoinedEvent
+                    ? "You joined an event on this date:"
+                    : "Available event(s) on this date:";
+
+            string eventNames =
+                string.Join(
+                    "\n",
+                    events.Select(
+                        volunteerEvent =>
+                            "• " +
+                            volunteerEvent.Title));
+
+            return title +
+                   "\n" +
+                   eventNames;
+        }
+
+
+        // =====================================================
+        // FORCE VISIBLE DATE BUTTONS TO REFRESH
+        // =====================================================
+
+        private void RefreshCalendarDayButtons()
+        {
+            EventCalendar.Dispatcher.BeginInvoke(
+                new Action(() =>
+                {
+                    List<CalendarDayButton>
+                        dayButtons =
+                            FindVisualChildren
+                                <CalendarDayButton>(
+                                    EventCalendar)
+                            .ToList();
+
+                    foreach (
+                        CalendarDayButton button
+                        in dayButtons)
+                    {
+                        ApplyCalendarDayStyle(
+                            button);
+                    }
+                }));
+        }
+
+
+        private static IEnumerable<T>
+            FindVisualChildren<T>(
+                DependencyObject dependencyObject)
+            where T : DependencyObject
+        {
+            if (dependencyObject == null)
+            {
+                yield break;
+            }
+
+            int childrenCount =
+                VisualTreeHelper
+                .GetChildrenCount(
+                    dependencyObject);
+
+            for (int i = 0;
+                 i < childrenCount;
+                 i++)
+            {
+                DependencyObject child =
+                    VisualTreeHelper
+                        .GetChild(
+                            dependencyObject,
+                            i);
+
+                T typedChild =
+                    child as T;
+
+                if (typedChild != null)
+                {
+                    yield return
+                        typedChild;
+                }
+
+                foreach (
+                    T childOfChild
+                    in FindVisualChildren<T>(
+                        child))
+                {
+                    yield return
+                        childOfChild;
+                }
+            }
+        }
+
+
+        // =====================================================
+        // CALENDAR EVENTS
+        // =====================================================
+
         private void EventCalendar_SelectedDatesChanged(
             object sender,
             SelectionChangedEventArgs e)
         {
-            if (EventCalendar.SelectedDate != null)
+            if (EventCalendar.SelectedDate !=
+                null)
             {
                 ShowEventsForDate(
                     EventCalendar
@@ -114,13 +471,17 @@ namespace VolenteerHub.Views
             }
         }
 
+
         private void EventCalendar_DisplayDateChanged(
             object sender,
             CalendarDateChangedEventArgs e)
         {
             ShowEventsForMonth(
                 EventCalendar.DisplayDate);
+
+            RefreshCalendarDayButtons();
         }
+
 
         private void ShowMonthButton_Click(
             object sender,
@@ -129,6 +490,11 @@ namespace VolenteerHub.Views
             ShowEventsForMonth(
                 EventCalendar.DisplayDate);
         }
+
+
+        // =====================================================
+        // OPEN EVENT
+        // =====================================================
 
         private void ViewEventButton_Click(
             object sender,
@@ -160,6 +526,11 @@ namespace VolenteerHub.Views
             this.Close();
         }
 
+
+        // =====================================================
+        // NAVIGATION
+        // =====================================================
+
         private void EventsButton_Click(
             object sender,
             RoutedEventArgs e)
@@ -172,6 +543,7 @@ namespace VolenteerHub.Views
 
             this.Close();
         }
+
 
         private void DashboardButton_Click(
             object sender,
